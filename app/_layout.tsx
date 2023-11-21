@@ -3,7 +3,7 @@ import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
-import { config as configGluestack } from "@gluestack-ui/config";
+import { config } from "@gluestack-ui/config";
 export { ErrorBoundary } from "expo-router";
 import { FontResolver } from "@gluestack-style/react";
 
@@ -12,19 +12,6 @@ export const unstable_settings = {
 };
 
 SplashScreen.preventAutoHideAsync();
-
-const config = {
-  ...configGluestack,
-  plugins: [
-    new FontResolver({
-      mapFonts: (style) => {
-        style.fontFamily = "Nunito Sans";
-        style.fontWeight = 800;
-        style.fontStyle = "italic";
-      },
-    }),
-  ],
-};
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -54,7 +41,10 @@ function RootLayoutNav() {
     <GluestackUIProvider config={config}>
       <Stack>
         <Stack.Screen name="workout/home" options={{ headerShown: false }} />
-        <Stack.Screen name="workout/workout" />
+        <Stack.Screen
+          name="workout/workout"
+          options={{ headerTitle: "Workout" }}
+        />
       </Stack>
     </GluestackUIProvider>
   );

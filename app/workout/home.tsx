@@ -10,21 +10,21 @@ import {
 } from "@gluestack-ui/themed";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../../firebase/config";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
+import { getToday } from "../../helpers/dates";
 
 export default function BeginWorkout() {
   const [today, setToday] = useState(false);
+  const { push } = useRouter();
 
   useEffect(() => {
     const getData = async () => {
       try {
         const today = await AsyncStorage.getItem("today");
-        console.log("🚀 ~ file: home.tsx:24 ~ getData ~ today:", today);
-        if (today !== "23/10/2011") {
-          setToday(true);
-        }
+
+        setToday(today !== getToday());
       } catch (e) {
         // error reading value
       }
@@ -35,9 +35,11 @@ export default function BeginWorkout() {
 
   const addDay = async () => {
     await addDoc(collection(db, "trainings/CXHbhEaOotF1b5bDpmBM/workouts"), {
-      day: "23/10/2011", // Timestamp
+      day: getToday(),
     })
-      .then(() => {})
+      .then(() => {
+        push("/workout/workout");
+      })
       .catch(() => {});
   };
 
@@ -65,13 +67,13 @@ export default function BeginWorkout() {
         }}
       >
         {today ? (
-          <Text>Treino de hoje já está concluído. Parabéns!</Text>
+          <Box bg="$success0" p="$4">
+            <Text>Treino de hoje já está concluído. Parabéns!</Text>
+          </Box>
         ) : (
           <Button variant="solid" size="lg" action="secondary" onPress={addDay}>
-            <Link href="/workout/workout">
-              <ButtonText>Começar treino</ButtonText>
-              <ButtonIcon as={ArrowRightIcon} />
-            </Link>
+            <ButtonText>Começar treino</ButtonText>
+            <ButtonIcon as={ArrowRightIcon} />
           </Button>
         )}
       </Box>

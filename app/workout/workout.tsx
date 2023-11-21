@@ -10,49 +10,75 @@ import {
   ScrollView,
   CheckIcon,
 } from "@gluestack-ui/themed";
+
 import { exercises } from "./utils";
 import { useState } from "react";
 import ModalWorkout from "./components/ModalWorkout"; // Lazy
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getToday } from "../../helpers/dates";
+import { updateDoc, doc } from "firebase/firestore";
+import { db } from "../../firebase/config";
+import useExercises from "./hooks";
 
 export default function Workout() {
   const [showModal, setShowModal] = useState(false);
-  const [finishedExercise, setfinishedExercise] = useState({});
+  const { push } = useRouter();
+  const { exercisesFinished, setCurrentExercise, currentExercise } =
+    useExercises();
 
   const completeWorkout = async () => {
-    await AsyncStorage.setItem("today", "23/10/2011");
+    await AsyncStorage.setItem("today", getToday());
+
+    const workoutRef = doc(
+      db,
+      "/trainings/CXHbhEaOotF1b5bDpmBM/workouts",
+      "TqZkbA8dQxXTnVMXQTEP"
+    );
+
+    await updateDoc(workoutRef, {
+      finished: true,
+    })
+      .then(() => {
+        push("/workout/home");
+      })
+      .catch(() => {});
   };
 
   return (
     <ScrollView>
+      <ModalWorkout
+        showModal={showModal}
+        setShowModal={setShowModal}
+        currentExercise={currentExercise}
+      />
       <VStack sx={{ margin: 8 }} space="md">
-        {exercises.map((exercise, idx) => (
-          <HStack key={idx}>
+        {exercises.map((exercise) => (
+          <HStack key={exercise}>
             <Box w="$2/3">
               <Text>{exercise}</Text>
             </Box>
             <Box w="$1/3">
               <Button
-                variant={finishedExercise[exercise] ? "solid" : "outline"}
+                variant={
+                  (exercisesFinished[exercise] as TFinishedExercise)
+                    ? "solid"
+                    : "outline"
+                }
                 size="sm"
-                action={finishedExercise[exercise] ? "positive" : "primary"}
-                onPress={() => setShowModal(true)}
+                action={
+                  (exercisesFinished[exercise] as TFinishedExercise)
+                    ? "positive"
+                    : "primary"
+                }
+                onPress={() => {
+                  setCurrentExercise(exercise);
+                  setShowModal(true);
+                }}
               >
                 <ButtonText>Séries</ButtonText>
                 <ButtonIcon as={AddIcon} />
               </Button>
-              <ModalWorkout
-                exercise={exercise}
-                showModal={showModal}
-                setShowModal={setShowModal}
-                setfinishedExercise={(exercise) =>
-                  setfinishedExercise((state) => ({
-                    ...state,
-                    [exercise]: exercise,
-                  }))
-                }
-              />
             </Box>
           </HStack>
         ))}
@@ -64,10 +90,8 @@ export default function Workout() {
         action="positive"
         onPress={completeWorkout}
       >
-        <Link href="/workout/home">
-          <ButtonText>Completar treino</ButtonText>
-          <ButtonIcon as={CheckIcon} />
-        </Link>
+        <ButtonText>Completar treino</ButtonText>
+        <ButtonIcon as={CheckIcon} />
       </Button>
     </ScrollView>
   );

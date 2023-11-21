@@ -1,8 +1,6 @@
 import {
-  HStack,
   Button,
   ButtonText,
-  Box,
   Modal,
   ModalContent,
   ModalBackdrop,
@@ -13,116 +11,62 @@ import {
   ModalHeader,
   ModalBody,
   CloseIcon,
-  Input,
-  InputField,
   ButtonIcon,
   AddIcon,
   VStack,
 } from "@gluestack-ui/themed";
 import { doc, updateDoc } from "firebase/firestore";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { db } from "../../../../firebase/config";
+import useExercises from "../../hooks";
+import { Questions, TField } from "./components";
 
-interface ModalWorkoutI {
+type TModalWorkout = {
   showModal: boolean;
   setShowModal: (state: boolean) => void;
-  exercise: string;
-  setfinishedExercise: (state: string) => void;
-}
+};
 
-interface ExerciseI {
+type TExercise = {
   serie: string;
   rep: string;
   weight: string;
-}
-
-interface QuestionsI {
-  handleFields: (
-    idx: number,
-    text: string,
-    field: "serie" | "rep" | "weight"
-  ) => void;
-  idx: number;
-}
-
-const Questions = ({ handleFields, idx }: QuestionsI) => {
-  return (
-    <HStack space="lg">
-      <Box w="$20">
-        <Input
-          variant="outline"
-          size="md"
-          isDisabled={false}
-          isInvalid={false}
-          isReadOnly={false}
-        >
-          <InputField
-            placeholder="Série"
-            onChangeText={(text) => handleFields(idx, text, "serie")}
-          />
-        </Input>
-      </Box>
-      <Box w="$20">
-        <Input
-          variant="outline"
-          size="md"
-          isDisabled={false}
-          isInvalid={false}
-          isReadOnly={false}
-        >
-          <InputField
-            placeholder="Rep"
-            onChangeText={(text) => handleFields(idx, text, "rep")}
-          />
-        </Input>
-      </Box>
-      <Box w="$20">
-        <Input
-          variant="outline"
-          size="md"
-          isDisabled={false}
-          isInvalid={false}
-          isReadOnly={false}
-        >
-          <InputField
-            placeholder="Weight"
-            onChangeText={(text) => handleFields(idx, text, "weight")}
-          />
-        </Input>
-      </Box>
-    </HStack>
-  );
 };
 
 const ModalWorkout = ({
   showModal,
   setShowModal,
-  exercise,
-  setfinishedExercise,
-}: ModalWorkoutI) => {
-  const ref = useRef(null);
-
-  const [fields, setFields] = useState<ExerciseI[] | []>([]);
+  currentExercise,
+}: TModalWorkout) => {
+  const [fields, setFields] = useState<TExercise[] | []>([]);
   const [series, setSeries] = useState([0]);
+  const { finishExercise } = useExercises();
+  console.log(
+    "🚀 ~ file: index.tsx:39 ~ ModalWorkout ~ currentExercise:",
+    currentExercise
+  );
 
   const updateExercise = async () => {
     const workoutRef = doc(
       db,
       "/trainings/CXHbhEaOotF1b5bDpmBM/workouts",
-      "hPK5XLMJHDkBD8nmn3M8"
+      "TqZkbA8dQxXTnVMXQTEP"
     );
+
     await updateDoc(workoutRef, {
-      exercises: { [exercise]: fields },
-    });
+      exercises: { [currentExercise]: fields },
+    })
+      .then(async () => {
+        await finishExercise(currentExercise);
+        setShowModal(false);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
-  const handleFields = (
-    idx: number,
-    text: string,
-    field: "serie" | "rep" | "weight"
-  ) => {
-    setFields((state: ExerciseI[] | []) => {
-      let arr: ExerciseI[] | [] = state;
+  const handleFields = (idx: number, text: string, field: TField) => {
+    setFields((prevState: TExercise[] | []) => {
+      let arr: TExercise[] | [] = [...prevState];
 
       if (arr[idx]) {
         arr[idx] = { ...arr[idx], [field]: text };
@@ -141,11 +85,7 @@ const ModalWorkout = ({
   };
 
   return (
-    <Modal
-      isOpen={showModal}
-      onClose={() => setShowModal(false)}
-      finalFocusRef={ref}
-    >
+    <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
       <ModalBackdrop />
       <ModalContent>
         <ModalHeader>
@@ -186,11 +126,7 @@ const ModalWorkout = ({
             size="sm"
             action="positive"
             borderWidth="$0"
-            onPress={() => {
-              setShowModal(false);
-              updateExercise();
-              setfinishedExercise(exercise);
-            }}
+            onPress={updateExercise}
           >
             <ButtonText>Confirmar</ButtonText>
           </Button>
