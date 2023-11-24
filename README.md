@@ -8,7 +8,7 @@ The project was created to mark the increase in weights in gym workouts. The ide
 
 | Home | Workout | Workout/Series |
 | :--: | :-----: | :------------: |
-|      |         |                |
+|    ![image](https://github.com/rogigs/pwr-lifting/assets/49894949/616a749b-bde8-41c5-a2e0-b9def6cd072e) |    ![image](https://github.com/rogigs/pwr-lifting/assets/49894949/ed0c146a-ef21-45c0-b1d4-4403d936f05c)    |    ![image](https://github.com/rogigs/pwr-lifting/assets/49894949/9f21decf-7532-431e-abdd-ffdb730b1d27) |
 
 ## Run Locally
 
