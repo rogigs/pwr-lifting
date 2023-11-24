@@ -8,24 +8,30 @@ import {
   ArrowRightIcon,
   Text,
 } from "@gluestack-ui/themed";
-import { addDoc, collection } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import { getToday } from "../../helpers/dates";
+import { doc, getDoc } from "firebase/firestore";
 
-export default function Home() {
-  const [today, setToday] = useState(false);
+export default function DayWorkout() {
+  const [dayWorkout, setWorkout] = useState();
 
   const { push } = useRouter();
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const today = await AsyncStorage.getItem("today");
+        const docRef = doc(db, "trainings", "CXHbhEaOotF1b5bDpmBM");
+        const docSnap = await getDoc(docRef);
+        const actualStrategie = docSnap.data().strategies.force;
 
-        setToday(today === getToday());
+        const workout = actualStrategie.division.length + 1;
+
+        if (workout > actualStrategie.lastWorkout) {
+          setWorkout(Object.keys(actualStrategie.division[0])[0]);
+        } else {
+          setWorkout(Object.keys(workout)[0]);
+        }
       } catch (e) {
         // error reading value
       }
@@ -34,14 +40,8 @@ export default function Home() {
     getData();
   }, []);
 
-  const addDay = async () => {
-    await addDoc(collection(db, "trainings/CXHbhEaOotF1b5bDpmBM/workouts"), {
-      day: getToday(),
-    })
-      .then(() => {
-        push("/workout/dayWorkout");
-      })
-      .catch(() => {});
+  const goToMarkWorkout = () => {
+    push("/workout/workout");
   };
 
   return (
@@ -67,16 +67,18 @@ export default function Home() {
           alignItems: "center",
         }}
       >
-        {today ? (
-          <Box bg="$success0" p="$4">
-            <Text>Treino de hoje já está concluído. Parabéns!</Text>
-          </Box>
-        ) : (
-          <Button variant="solid" size="lg" action="secondary" onPress={addDay}>
-            <ButtonText>Começar treino</ButtonText>
-            <ButtonIcon as={ArrowRightIcon} />
-          </Button>
-        )}
+        <Box bg="$white" p="$4" m="$4">
+          <Text>Hoje é dia de {dayWorkout}</Text>
+        </Box>
+        <Button
+          variant="solid"
+          size="lg"
+          action="secondary"
+          onPress={goToMarkWorkout}
+        >
+          <ButtonText>Começar a marcar o progresso</ButtonText>
+          <ButtonIcon as={ArrowRightIcon} />
+        </Button>
       </Box>
     </VStack>
   );

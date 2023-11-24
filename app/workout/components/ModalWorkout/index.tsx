@@ -40,10 +40,6 @@ const ModalWorkout = ({
   const [fields, setFields] = useState<TExercise[] | []>([]);
   const [series, setSeries] = useState([0]);
   const { finishExercise } = useExercises();
-  console.log(
-    "🚀 ~ file: index.tsx:39 ~ ModalWorkout ~ currentExercise:",
-    currentExercise
-  );
 
   const updateExercise = async () => {
     const workoutRef = doc(

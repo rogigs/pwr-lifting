@@ -42,6 +42,11 @@ function RootLayoutNav() {
       <Stack>
         <Stack.Screen name="workout/home" options={{ headerShown: false }} />
         <Stack.Screen
+          name="workout/dayWorkout"
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
           name="workout/workout"
           options={{ headerTitle: "Workout" }}
         />
