@@ -19,13 +19,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getToday } from "../../helpers/dates";
 import { updateDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase/config";
-import useExercises from "./hooks";
+
+type TFinishedExercise = Record<string, string | undefined>;
 
 export default function Workout() {
   const [showModal, setShowModal] = useState(false);
+  const [currentExercise, setCurrentExercise] = useState<string>();
+  const [exercisesFinished, setExercisesFinished] = useState<
+    TFinishedExercise | {}
+  >({});
+
   const { push } = useRouter();
-  const { exercisesFinished, setCurrentExercise, currentExercise } =
-    useExercises();
 
   const completeWorkout = async () => {
     await AsyncStorage.setItem("today", getToday());
@@ -45,43 +49,55 @@ export default function Workout() {
       .catch(() => {});
   };
 
+  const finishExercise = (exercise: string) => {
+    setExercisesFinished((prevState) => ({
+      ...prevState,
+      exercise,
+    }));
+
+    setCurrentExercise("");
+  };
+
   return (
     <ScrollView>
       <ModalWorkout
         showModal={showModal}
         setShowModal={setShowModal}
         currentExercise={currentExercise}
+        finishExercise={finishExercise}
       />
       <VStack sx={{ margin: 8 }} space="md">
-        {exercises.map((exercise) => (
-          <HStack key={exercise}>
-            <Box w="$2/3">
-              <Text>{exercise}</Text>
-            </Box>
-            <Box w="$1/3">
-              <Button
-                variant={
-                  (exercisesFinished[exercise] as TFinishedExercise)
-                    ? "solid"
-                    : "outline"
-                }
-                size="sm"
-                action={
-                  (exercisesFinished[exercise] as TFinishedExercise)
-                    ? "positive"
-                    : "primary"
-                }
-                onPress={() => {
-                  setCurrentExercise(exercise);
-                  setShowModal(true);
-                }}
-              >
-                <ButtonText>Séries</ButtonText>
-                <ButtonIcon as={AddIcon} />
-              </Button>
-            </Box>
-          </HStack>
-        ))}
+        {Object.values(exercises).map((partBody) =>
+          partBody.map((exercise) => (
+            <HStack key={exercise}>
+              <Box w="$2/3">
+                <Text>{exercise}</Text>
+              </Box>
+              <Box w="$1/3">
+                <Button
+                  variant={
+                    (exercisesFinished[exercise] as TFinishedExercise)
+                      ? "solid"
+                      : "outline"
+                  }
+                  size="sm"
+                  action={
+                    (exercisesFinished[exercise] as TFinishedExercise)
+                      ? "positive"
+                      : "primary"
+                  }
+                  onPress={() => {
+                    setCurrentExercise(exercise);
+                    setShowModal(true);
+                  }}
+                >
+                  <ButtonText>Séries</ButtonText>
+                  <ButtonIcon as={AddIcon} />
+                </Button>
+              </Box>
+            </HStack>
+          ))
+        )}
       </VStack>
 
       <Button
