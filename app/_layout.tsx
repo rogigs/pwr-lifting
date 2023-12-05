@@ -8,7 +8,7 @@ export { ErrorBoundary } from "expo-router";
 import { FontResolver } from "@gluestack-style/react";
 
 export const unstable_settings = {
-  initialRouteName: "workout/home",
+  initialRouteName: "index",
 };
 
 SplashScreen.preventAutoHideAsync();
@@ -20,6 +20,8 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    console.log("erro", error);
+
     if (error) throw error;
   }, [error]);
 
@@ -27,11 +29,17 @@ export default function RootLayout() {
     if (loaded) {
       SplashScreen.hideAsync();
     }
+
+    console.log("loaded", loaded);
   }, [loaded]);
 
   if (!loaded) {
+    console.log("Hire");
+
     return null;
   }
+
+  console.log("Nunca");
 
   return <RootLayoutNav />;
 }
