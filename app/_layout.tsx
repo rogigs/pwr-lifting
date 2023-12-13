@@ -20,8 +20,6 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    console.log("erro", error);
-
     if (error) throw error;
   }, [error]);
 
@@ -29,17 +27,11 @@ export default function RootLayout() {
     if (loaded) {
       SplashScreen.hideAsync();
     }
-
-    console.log("loaded", loaded);
   }, [loaded]);
 
   if (!loaded) {
-    console.log("Hire");
-
     return null;
   }
-
-  console.log("Nunca");
 
   return <RootLayoutNav />;
 }
@@ -53,7 +45,6 @@ function RootLayoutNav() {
           name="workout/dayWorkout"
           options={{ headerShown: false }}
         />
-
         <Stack.Screen
           name="workout/workout"
           options={{ headerTitle: "Workout" }}

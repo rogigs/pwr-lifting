@@ -18,12 +18,13 @@ import {
 import { doc, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 import { db } from "../../../../firebase/config";
-import useExercises from "../../hooks";
 import { Questions, TField } from "./components";
 
 type TModalWorkout = {
   showModal: boolean;
   setShowModal: (state: boolean) => void;
+  currentExercise: string | undefined;
+  finishExercise: () => void;
 };
 
 type TExercise = {
@@ -36,28 +37,30 @@ const ModalWorkout = ({
   showModal,
   setShowModal,
   currentExercise,
+  finishExercise,
 }: TModalWorkout) => {
   const [fields, setFields] = useState<TExercise[] | []>([]);
   const [series, setSeries] = useState([0]);
-  const { finishExercise } = useExercises();
 
   const updateExercise = async () => {
-    const workoutRef = doc(
-      db,
-      "/trainings/CXHbhEaOotF1b5bDpmBM/workouts",
-      "TqZkbA8dQxXTnVMXQTEP"
-    );
+    setShowModal(false);
+    await finishExercise({ [currentExercise]: fields[0] });
+    // const workoutRef = doc(
+    //   db,
+    //   "/trainings/CXHbhEaOotF1b5bDpmBM/workouts",
+    //   "TqZkbA8dQxXTnVMXQTEP"
+    // );
 
-    await updateDoc(workoutRef, {
-      exercises: { [currentExercise]: fields },
-    })
-      .then(async () => {
-        await finishExercise(currentExercise);
-        setShowModal(false);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    // await updateDoc(workoutRef, {
+    //   exercises: { [currentExercise]: fields },
+    // })
+    //   .then(async () => {
+    //
+
+    //   })
+    //   .catch((error) => {
+    //     console.error(error);
+    //   });
   };
 
   const handleFields = (idx: number, text: string, field: TField) => {

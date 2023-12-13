@@ -12,33 +12,12 @@ import { db } from "../../firebase/config";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
+import { useWorkout } from "../../hooks/workout/useWorkout";
 
 export default function DayWorkout() {
-  const [dayWorkout, setWorkout] = useState();
+  const { workoutName } = useWorkout();
 
   const { push } = useRouter();
-
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const docRef = doc(db, "trainings", "CXHbhEaOotF1b5bDpmBM");
-        const docSnap = await getDoc(docRef);
-        const actualStrategie = docSnap.data().strategies.force;
-
-        const workout = actualStrategie.division.length + 1;
-
-        if (workout > actualStrategie.lastWorkout) {
-          setWorkout(Object.keys(actualStrategie.division[0])[0]);
-        } else {
-          setWorkout(Object.keys(workout)[0]);
-        }
-      } catch (e) {
-        // error reading value
-      }
-    };
-
-    getData();
-  }, []);
 
   const goToMarkWorkout = () => {
     push("/workout/workout");
@@ -68,7 +47,7 @@ export default function DayWorkout() {
         }}
       >
         <Box bg="$white" p="$4" m="$4">
-          <Text>Hoje é dia de {dayWorkout}</Text>
+          <Text>Hoje é dia de {workoutName}</Text>
         </Box>
         <Button
           variant="solid"

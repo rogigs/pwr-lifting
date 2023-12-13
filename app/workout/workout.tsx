@@ -10,53 +10,107 @@ import {
   ScrollView,
   CheckIcon,
 } from "@gluestack-ui/themed";
-
-import { exercises } from "./utils";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import ModalWorkout from "./components/ModalWorkout"; // Lazy
 import { useRouter } from "expo-router";
+import { useWorkout } from "../../hooks/workout/useWorkout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getToday } from "../../helpers/dates";
-import { updateDoc, doc } from "firebase/firestore";
-import { db } from "../../firebase/config";
 
-type TFinishedExercise = Record<string, string | undefined>;
+type ExerciseData = {
+  [exerciseName: string]: {
+    serie: string;
+    rep: string;
+    weight: string;
+  };
+};
+
+type ListExerciseProps = {
+  workout: string[];
+};
+
+const ListExercise = ({
+  workout,
+  setShowModal,
+  setCurrentExercise,
+  exercisesToDrop,
+}: ListExerciseProps) => {
+  if (!workout) {
+    return null;
+  }
+
+  return workout.map((exercise) => {
+    const attributesUI = exercisesToDrop[exercise]
+      ? {
+          buttonVariant: "solid",
+          buttonAction: "positive",
+        }
+      : {
+          buttonVariant: "outline",
+          buttonAction: "primary",
+        };
+
+    return (
+      <HStack key={exercise}>
+        <Box w="$2/3">
+          <Text>{exercise}</Text>
+        </Box>
+        <Box w="$1/3">
+          <Button
+            variant={attributesUI.buttonVariant}
+            size="sm"
+            action={attributesUI.buttonAction}
+            onPress={() => {
+              setCurrentExercise(exercise);
+              setShowModal(true);
+            }}
+          >
+            <ButtonText>Séries</ButtonText>
+            <ButtonIcon as={AddIcon} />
+          </Button>
+        </Box>
+      </HStack>
+    );
+  });
+};
 
 export default function Workout() {
+  const { workout, completeWorkout } = useWorkout();
+
   const [showModal, setShowModal] = useState(false);
   const [currentExercise, setCurrentExercise] = useState<string>();
-  const [exercisesFinished, setExercisesFinished] = useState<
-    TFinishedExercise | {}
-  >({});
+  const [exercisesToDrop, setExercisesToDrop] = useState({});
 
   const { push } = useRouter();
 
-  const completeWorkout = async () => {
-    await AsyncStorage.setItem("today", getToday());
+  const finishExercise = async (exerciseData: ExerciseData) => {
+    const todayWorkout = await AsyncStorage.getItem("todayWorkout");
 
-    const workoutRef = doc(
-      db,
-      "/trainings/CXHbhEaOotF1b5bDpmBM/workouts",
-      "TqZkbA8dQxXTnVMXQTEP"
+    await AsyncStorage.setItem(
+      "todayWorkout",
+      JSON.stringify(
+        todayWorkout
+          ? { ...JSON.parse(todayWorkout), ...exerciseData }
+          : JSON.stringify(exerciseData)
+      )
     );
 
-    await updateDoc(workoutRef, {
-      finished: true,
-    })
-      .then(() => {
-        push("/workout/home");
-      })
-      .catch(() => {});
-  };
-
-  const finishExercise = (exercise: string) => {
-    setExercisesFinished((prevState) => ({
+    setExercisesToDrop((prevState) => ({
       ...prevState,
-      exercise,
+      currentExercise,
     }));
 
     setCurrentExercise("");
   };
+
+  const cbOfCompleteWorkout = useCallback(() => {
+    completeWorkout(async () => {
+      await AsyncStorage.setItem("todayWorkout", "");
+
+      push("/workout/home");
+    });
+  }, []);
+
+  // TODO: UseEffect to get storage
 
   return (
     <ScrollView>
@@ -67,44 +121,19 @@ export default function Workout() {
         finishExercise={finishExercise}
       />
       <VStack sx={{ margin: 8 }} space="md">
-        {Object.values(exercises).map((partBody) =>
-          partBody.map((exercise) => (
-            <HStack key={exercise}>
-              <Box w="$2/3">
-                <Text>{exercise}</Text>
-              </Box>
-              <Box w="$1/3">
-                <Button
-                  variant={
-                    (exercisesFinished[exercise] as TFinishedExercise)
-                      ? "solid"
-                      : "outline"
-                  }
-                  size="sm"
-                  action={
-                    (exercisesFinished[exercise] as TFinishedExercise)
-                      ? "positive"
-                      : "primary"
-                  }
-                  onPress={() => {
-                    setCurrentExercise(exercise);
-                    setShowModal(true);
-                  }}
-                >
-                  <ButtonText>Séries</ButtonText>
-                  <ButtonIcon as={AddIcon} />
-                </Button>
-              </Box>
-            </HStack>
-          ))
-        )}
+        <ListExercise
+          workout={workout}
+          setShowModal={setShowModal}
+          setCurrentExercise={setCurrentExercise}
+          exercisesToDrop={exercisesToDrop}
+        />
       </VStack>
 
       <Button
         variant="solid"
         size="lg"
         action="positive"
-        onPress={completeWorkout}
+        onPress={cbOfCompleteWorkout}
       >
         <ButtonText>Completar treino</ButtonText>
         <ButtonIcon as={CheckIcon} />

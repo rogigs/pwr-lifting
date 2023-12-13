@@ -11,28 +11,19 @@ import {
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
 import { getToday } from "../../helpers/dates";
+import { useToday } from "../../hooks/workout/useToday";
 
-export default function Home() {
-  const [today, setToday] = useState(false);
+const TrainingCompleted = () => {
+  return (
+    <Box bg="$success0" p="$4">
+      <Text>Treino de hoje já está concluído. Parabéns!</Text>
+    </Box>
+  );
+};
 
+const TrainingToComplete = () => {
   const { push } = useRouter();
-
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const today = await AsyncStorage.getItem("today");
-
-        setToday(today === getToday());
-      } catch (e) {
-        // error reading value
-      }
-    };
-
-    getData();
-  }, []);
 
   const addDay = async () => {
     await addDoc(collection(db, "trainings/CXHbhEaOotF1b5bDpmBM/workouts"), {
@@ -41,8 +32,21 @@ export default function Home() {
       .then(() => {
         push("/workout/dayWorkout");
       })
-      .catch(() => {});
+      .catch((e) => {
+        console.error(e);
+      });
   };
+
+  return (
+    <Button variant="solid" size="lg" action="secondary" onPress={addDay}>
+      <ButtonText>Começar treino</ButtonText>
+      <ButtonIcon as={ArrowRightIcon} />
+    </Button>
+  );
+};
+
+export default function Home() {
+  const { isToday } = useToday();
 
   return (
     <VStack>
@@ -67,16 +71,7 @@ export default function Home() {
           alignItems: "center",
         }}
       >
-        {today ? (
-          <Box bg="$success0" p="$4">
-            <Text>Treino de hoje já está concluído. Parabéns!</Text>
-          </Box>
-        ) : (
-          <Button variant="solid" size="lg" action="secondary" onPress={addDay}>
-            <ButtonText>Começar treino</ButtonText>
-            <ButtonIcon as={ArrowRightIcon} />
-          </Button>
-        )}
+        {isToday ? <TrainingCompleted /> : <TrainingToComplete />}
       </Box>
     </VStack>
   );
