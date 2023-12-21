@@ -1,15 +1,8 @@
 import {
   Button,
   ButtonText,
-  Modal,
-  ModalContent,
-  ModalBackdrop,
   Heading,
-  ModalCloseButton,
-  ModalFooter,
   Icon,
-  ModalHeader,
-  ModalBody,
   CloseIcon,
   ButtonIcon,
   AddIcon,
@@ -19,12 +12,12 @@ import { doc, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 import { db } from "../../../../firebase/config";
 import { Questions, TField } from "./components";
+import { Modal, useModal } from "../../../../components/Modal";
+import { ExerciseData } from "../../workout";
 
 type TModalWorkout = {
-  showModal: boolean;
-  setShowModal: (state: boolean) => void;
   currentExercise: string | undefined;
-  finishExercise: () => void;
+  finishExercise: (exerciseData: ExerciseData) => Promise<void>;
 };
 
 type TExercise = {
@@ -33,17 +26,12 @@ type TExercise = {
   weight: string;
 };
 
-const ModalWorkout = ({
-  showModal,
-  setShowModal,
-  currentExercise,
-  finishExercise,
-}: TModalWorkout) => {
+const ModalWorkout = ({ currentExercise, finishExercise }: TModalWorkout) => {
   const [fields, setFields] = useState<TExercise[] | []>([]);
   const [series, setSeries] = useState([0]);
+  const { setShowModal } = useModal();
 
   const updateExercise = async () => {
-    setShowModal(false);
     await finishExercise({ [currentExercise]: fields[0] });
     // const workoutRef = doc(
     //   db,
@@ -84,54 +72,51 @@ const ModalWorkout = ({
   };
 
   return (
-    <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-      <ModalBackdrop />
-      <ModalContent>
-        <ModalHeader>
-          <Heading size="lg">Informações sobre suas séries</Heading>
-          <ModalCloseButton>
-            <Icon as={CloseIcon} />
-          </ModalCloseButton>
-        </ModalHeader>
-        <ModalBody>
-          <VStack space="md">
-            {series.map((serie) => (
-              <Questions key={serie} handleFields={handleFields} idx={serie} />
-            ))}
-            <Button
-              variant="solid"
-              action="primary"
-              isDisabled={false}
-              isFocusVisible={false}
-              onPress={oneMoreSerie}
-            >
-              <ButtonText>Add </ButtonText>
-              <ButtonIcon as={AddIcon} />
-            </Button>
-          </VStack>
-        </ModalBody>
-        <ModalFooter>
+    <Modal.Modal>
+      <Modal.ModalHeader>
+        <Heading size="lg">Informações sobre suas séries</Heading>
+        <Modal.ModalCloseButton>
+          <Icon as={CloseIcon} />
+        </Modal.ModalCloseButton>
+      </Modal.ModalHeader>
+      <Modal.ModalBody>
+        <VStack space="md">
+          {series.map((serie) => (
+            <Questions key={serie} handleFields={handleFields} idx={serie} />
+          ))}
           <Button
-            variant="outline"
-            action="secondary"
-            mr="$3"
-            onPress={() => {
-              setShowModal(false);
-            }}
+            variant="solid"
+            action="primary"
+            isDisabled={false}
+            isFocusVisible={false}
+            onPress={oneMoreSerie}
           >
-            <ButtonText>Cancelar</ButtonText>
+            <ButtonText>Add </ButtonText>
+            <ButtonIcon as={AddIcon} />
           </Button>
-          <Button
-            size="sm"
-            action="positive"
-            borderWidth="$0"
-            onPress={updateExercise}
-          >
-            <ButtonText>Confirmar</ButtonText>
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </VStack>
+      </Modal.ModalBody>
+      <Modal.ModalFooter>
+        <Button
+          variant="outline"
+          action="secondary"
+          mr="$3"
+          onPress={() => {
+            setShowModal(false);
+          }}
+        >
+          <ButtonText>Cancelar</ButtonText>
+        </Button>
+        <Button
+          size="sm"
+          action="positive"
+          borderWidth="$0"
+          onPress={updateExercise}
+        >
+          <ButtonText>Confirmar</ButtonText>
+        </Button>
+      </Modal.ModalFooter>
+    </Modal.Modal>
   );
 };
 

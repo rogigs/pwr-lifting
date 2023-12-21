@@ -26,15 +26,16 @@ const TrainingToComplete = () => {
   const { push } = useRouter();
 
   const addDay = async () => {
-    await addDoc(collection(db, "trainings/CXHbhEaOotF1b5bDpmBM/workouts"), {
-      day: getToday(),
-    })
-      .then(() => {
-        push("/workout/dayWorkout");
-      })
-      .catch((e) => {
-        console.error(e);
-      });
+    push("/workout/dayWorkout");
+
+    // TODO: change rules to visibility
+    // await addDoc(collection(db, "trainings/CXHbhEaOotF1b5bDpmBM/workouts"), {
+    //   day: getToday(),
+    // })
+    //   .then(() => {})
+    //   .catch((e) => {
+    //     console.error(e);
+    //   });
   };
 
   return (
