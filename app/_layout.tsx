@@ -40,6 +40,7 @@ function RootLayoutNav() {
   return (
     <GluestackUIProvider config={config}>
       <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="workout/home" options={{ headerShown: false }} />
         <Stack.Screen
           name="workout/dayWorkout"
