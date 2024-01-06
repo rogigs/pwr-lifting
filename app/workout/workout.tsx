@@ -13,6 +13,7 @@ import { useWorkout } from "../../hooks/workout/useWorkout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ModalProvider } from "../../components/Modal";
 import { ListExercise } from "./components/ListExercises";
+import { useUser } from "../../hooks/useUser";
 
 export type ExerciseData = {
   [exerciseName: string]: {
@@ -23,6 +24,8 @@ export type ExerciseData = {
 };
 
 export default function Workout() {
+  const { user } = useUser();
+  console.log("🚀 ~ file: workout.tsx:28 ~ Workout ~ user:", user);
   const { workout, completeWorkout } = useWorkout();
 
   const [currentExercise, setCurrentExercise] = useState<string>();

@@ -11,6 +11,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { useEffect } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/config";
+import { useUser } from "../hooks/useUser";
 
 type Inputs = {
   email: string;
@@ -20,6 +21,7 @@ type Inputs = {
 export default function Page() {
   const { register, setValue, handleSubmit } = useForm<Inputs>();
   const { push } = useRouter();
+  const { setUser } = useUser();
 
   useEffect(() => {
     register("email");
@@ -30,9 +32,9 @@ export default function Page() {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
-        console.log("🚀 ~ file: index.tsx:30 ~ .then ~ user:", user);
 
-        // push("workout/home")
+        setUser(user.uid);
+        push("/workout/home");
       })
       .catch((error) => {
         const errorCode = error.code;

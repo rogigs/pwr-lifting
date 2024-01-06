@@ -6,6 +6,7 @@ import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { config } from "@gluestack-ui/config";
 export { ErrorBoundary } from "expo-router";
 import { FontResolver } from "@gluestack-style/react";
+import { UserProvider } from "../context/UserProvider";
 
 export const unstable_settings = {
   initialRouteName: "index",
@@ -38,21 +39,23 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   return (
-    <GluestackUIProvider config={config}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="createAccount" options={{ headerShown: false }} />
+    <UserProvider>
+      <GluestackUIProvider config={config}>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="createAccount" options={{ headerShown: false }} />
 
-        <Stack.Screen name="workout/home" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="workout/dayWorkout"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="workout/workout"
-          options={{ headerTitle: "Workout" }}
-        />
-      </Stack>
-    </GluestackUIProvider>
+          <Stack.Screen name="workout/home" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="workout/dayWorkout"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="workout/workout"
+            options={{ headerTitle: "Workout" }}
+          />
+        </Stack>
+      </GluestackUIProvider>
+    </UserProvider>
   );
 }
