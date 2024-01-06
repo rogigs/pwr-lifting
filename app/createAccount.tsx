@@ -9,7 +9,7 @@ import {
 } from "@gluestack-ui/themed";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useEffect } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/config";
 
 type Inputs = {
@@ -17,7 +17,7 @@ type Inputs = {
   password: string;
 };
 
-export default function Page() {
+export default function CreateAccount() {
   const { register, setValue, handleSubmit } = useForm<Inputs>();
   const { push } = useRouter();
 
@@ -27,7 +27,7 @@ export default function Page() {
   }, [register]);
 
   const onSubmit: SubmitHandler<Inputs> = ({ email, password }) => {
-    signInWithEmailAndPassword(auth, email, password)
+    createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
         console.log("🚀 ~ file: index.tsx:30 ~ .then ~ user:", user);
@@ -65,34 +65,13 @@ export default function Page() {
           type="password"
         />
       </Input>
-      <Text fontWeight="$bold" underline>
-        Trocar senha
-      </Text>
-
       <Button
         variant="solid"
         size="lg"
         action="positive"
         onPress={handleSubmit(onSubmit)}
       >
-        <ButtonText>Logar</ButtonText>
-      </Button>
-      <Button
-        variant="outline"
-        size="lg"
-        action="positive"
-        onPress={() => push("/createAccount")}
-      >
         <ButtonText>Criar conta</ButtonText>
-      </Button>
-
-      <Button
-        variant="outline"
-        size="lg"
-        action="positive"
-        onPress={() => push("/workout/home")}
-      >
-        <ButtonText>FOR DEV</ButtonText>
       </Button>
     </VStack>
   );
